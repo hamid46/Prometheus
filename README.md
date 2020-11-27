@@ -2,5 +2,5 @@
 This repository is for Prometheus data and configuration file
 
 
-# Prometheus configurations checing command:
+# Prometheus configurations checking command:
 - /etc/prometheus/promtool check config /etc/prometheus/prometheus.yml
