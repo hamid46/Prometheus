@@ -1,0 +1,67 @@
+groups:
+ - name: Kafka Alert Rules
+   rules:
+   # -----* Kafka_PartitionCountHigh * ------
+   - alert: Kafka_PartitionCountHigh
+     expr: (kafka_server_replicamanager_partitioncount) > 100
+     for: 10s
+     labels:
+       severity: critical
+     annotations:
+       summary: "high partition count (instance {{ $labels.instance }})"
+       description: "broker {{ $labels.brokerId }} has high partition count"
+   # -----* Kafka_UnderMinIsrPartitionCount * ------
+   - alert: Kafka_UnderMinIsrPartitionCount
+     expr: kafka_server_replicamanager_underminisrpartitioncount > 0
+     for: 10s
+     labels:
+       severity: critical
+     annotations:
+       summary: "Kafka under min ISR partitions"
+       description: "There are {{ $value }} partitions under the min ISR on {{ $labels.instance }}"
+   # -----* Kafka_OfflinePartitions * ------
+   - alert: Kafka_OfflinePartitions
+     expr: sum(kafka_controller_kafkacontroller_offlinepartitionscount) > 0
+     for: 10s
+     labels:
+       severity: critical
+     annotations:
+       summary: "Kafka offline partitions"
+       description: "One or more partitions have no leader"
+   # -----* Kafka_AbnormalControllerState * ------
+   - alert: Kafka_AbnormalControllerState
+     expr: sum(kafka_controller_kafkacontroller_activecontrollercount) != 1
+     for: 10s
+     labels:
+       severity: critical
+     annotations:
+       summary: "Kafka abnormal controller state"
+       description: "There are {{ $value }} active controllers in the cluster"
+   # -----* Kafka_OfflineLogDirectoryCount * ------
+   - alert: Kafka_OfflineLogDirectoryCount
+     expr: kafka_log_logmanager_offlinelogdirectorycount > 0
+     for: 10s
+     labels:
+       severity: critical
+     annotations:
+       summary: "Kafka offline log directories"
+       description: "There are {{ $value }} offline log directories on {{ $labels.instance }}"
+   # -----* Kafka_ScrapeProblem * ------
+   - alert: Kafka_ScrapeProblem
+     expr: up{job="vip_call_kafka_server"} == 0
+     for: 1m
+     labels:
+       severity: critical
+     annotations:
+       summary: "Prometheus unable to scrape metrics from {{ $labels.instance }}"
+       description: "Prometheus was unable to scrape metrics from {{ $labels.instance }} for more than 1 minutes"
+   # -----* Zookeeper Down Alert* ------
+   - alert: vipcall_kafka_zookeeper_down
+     expr: (kafka_server_sessionexpirelistener_zookeeperdisconnects_total) == 1
+     for: 1m
+     labels:
+       severity: critical
+     annotations:
+       summary: "Zookeeper is down {{ $labels.instance }}"
+       description: "Zookeper is unable to connect from kafka from {{ $labels.instance }} for more than 1 minutes"
+       

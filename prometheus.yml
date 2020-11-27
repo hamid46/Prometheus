@@ -1,0 +1,105 @@
+# my global config
+global:
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      - localhost:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+    - "prometheus_alert_rules.yml"
+    - "MySQL_alert_rules.yml"
+    - "jvm-alerting.yml"
+    - "system_level_alert_rules.yml"
+    - "kafka_alert_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+    - targets: ['192.168.11.229:9090']
+    
+  - job_name: 'alertmanagers'
+    static_configs:
+    - targets: ['192.168.11.229:9093']
+    
+  - job_name: 'grafana'
+    static_configs:
+    - targets: ['192.168.11.229:3000']
+    
+  - job_name: 'vip_call_servers'
+    static_configs:
+    - targets: ['192.168.11.229:9100', '192.168.11.228:9100', '10.200.116.133:9100' , '10.200.116.134:9100' ,
+        '10.200.116.135:9100' , '10.200.116.137:9100' , '10.200.116.138:9100' , '10.200.116.139:9100' , 
+        '10.200.116.141:9100',  '10.200.116.142:9100' , '10.200.116.143:9100' , '10.200.116.146:9100' ,
+        '10.200.116.147:9100' , '10.200.116.148:9100' , '10.200.116.150:9100' , '10.200.116.151:9100' ,
+        '10.200.116.154:9100' , '10.200.116.155:9100']
+  
+  - job_name: 'nm_and_vip_call_sigtran_server'
+    static_configs:
+    - targets: ['10.200.116.134:8080','10.200.116.138:8080','10.200.123.73:8080','10.200.123.81:8080']
+    
+  - job_name: 'nm_servers'
+    static_configs:
+    - targets: ['10.200.123.72:9100','10.200.123.75:9100','10.200.123.73:9100','10.200.123.76:9100','10.200.123.78:9100','10.200.123.79:9100','10.200.123.81:9100','10.200.123.82:9100']
+#  - job_name: 'node'
+#    # metrics_path defaults to '/metrics'
+#    # scheme defaults to 'http'.
+#    static_configs:
+#    - targets: ['localhost:9100']
+
+  - job_name: 'vip_call_provisioning_gateway'
+    metrics_path: /actuator/prometheus
+    static_configs:
+    - targets: ['10.200.116.135:80','10.200.116.141:80']
+
+  - job_name: 'vip_call_ussd_gateway'
+    metrics_path: /actuator/prometheus
+    static_configs:
+    - targets: ['10.200.116.135:9190','10.200.116.141:9190']
+
+  - job_name: 'vip_call_service_controller'
+    metrics_path: /actuator/prometheus
+    static_configs:
+    - targets: ['10.200.116.135:8001','10.200.116.141:8001']
+  
+  - job_name: 'vip_call_db_servers'
+    static_configs:
+    - targets: ['10.200.116.146:9104','10.200.116.150:9104']
+         
+  - job_name: 'vip_call_kafka_server'
+    static_configs:
+    - targets: ['10.200.116.143:7071', '10.200.116.146:7071', '10.200.116.150:7071']
+
+  - job_name: 'nm_kafka_server'
+    static_configs:
+    - targets: ['10.200.123.72:8989','10.200.123.75:8989','10.200.123.79:8989']
+      
+  - job_name: 'vip_call_SMS_Handler'
+    static_configs:
+    - targets: ['10.200.116.148:8080', '10.200.116.151:8080']
+
+  - job_name: 'vip_call_AGI_server'
+    static_configs:
+    - targets: ['10.200.116.133:8080', '10.200.116.137:8080']
+
+  - job_name: 'vip_call_asterisk_exporter'
+    static_configs:
+    - targets: ['10.200.116.133:9200']
+    
+  - job_name: 'notify_me_engine'
+    metrics_path: /actuator/prometheus
+    static_configs:
+    - targets: ['10.200.123.72:9000','10.200.123.75:9000','10.200.123.79:9000','10.200.123.82:9000']

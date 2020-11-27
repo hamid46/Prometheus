@@ -1,0 +1,101 @@
+groups:
+ - name: Server Level Monitoring
+   rules:
+   # -----* InstanceDown * ------
+   #this rule is for any InstanceDown|Ping|Ssh not available
+   - alert: InstanceDown|Ping Unavailability|SSH not available
+     expr: up == 0 
+     for: 1m
+     labels:
+       severity: critical
+     annotations:
+       summary: "Server is down please check on priority (instance {{ $labels.instance }})"   
+   # -----* High CPU * ------
+   #this rule is for high CPU load
+   - alert: HighCpuLoad
+     expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 70
+     for: 1m
+     labels:
+       severity: warning
+     annotations:
+       summary: "Host high CPU load (instance {{ $labels.instance }})"
+       description: "CPU load is > 70%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}" 
+   # -----* Out of Memory * ------
+   #this rule is for any out of memory
+   - alert: Node is OutOfMemory
+     expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 20
+     for: 1m
+     labels:
+       severity: warning
+     annotations:
+       summary: "Node goes out of memory (instance {{ $labels.instance }})"
+       description: "Node memory is filling up (< 20% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+   # -----* Out of Dusk Space * ------   
+   #this rule is for any Host out of disk space
+   - alert: DiskSpaceUsage
+     expr: 100 - (100 * node_filesystem_avail_bytes / node_filesystem_size_bytes) > 80
+     for: 1m
+     labels:
+       severity: critical
+     annotations:
+       summary: "Disk Space Usage (instance {{ $labels.instance }})"
+       description: "Disk Space on Drive is used more than 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+   # -----* Swap Memory * ------
+   #this rule is for if Swap memory is full
+   - alert: HostSwapIsFillingUp
+     expr: (1 - (node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)) * 100 > 80
+     for: 5m
+     labels:
+       severity: warning
+     annotations:
+       summary: "Host swap is filling up (instance {{ $labels.instance }})"
+       description: "Swap is filling up (>80%)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+   # -----* JVM Memory Full * ------
+   #this rule is for if JVM memory is filling up (> 80%) 
+   - alert: JvmMemoryFillingUp
+     expr: jvm_memory_bytes_used / jvm_memory_bytes_max{area="heap"} > 0.8
+     for: 1m
+     labels:
+       severity: warning
+     annotations:
+       summary: "JVM memory filling up (instance {{ $labels.instance }})"
+       description: "JVM memory is filling up (> 80%)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"       
+   # -----* SystemD Service Crashed * ------       
+   #this rule is for if SystemD service is crashed    
+   - alert: HostSystemdServiceCrashed
+     expr: node_systemd_unit_state{state="failed"} == 1
+     for: 1m
+     labels:
+       severity: warning
+     annotations:
+       summary: "Host SystemD service crashed (instance {{ $labels.instance }})"
+       description: "SystemD service crashed\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+   # -----* Host Network Receive Errors * ------
+   #this rule is for Host Network Receive Errors
+   - alert: HostNetworkReceiveErrors
+     expr: increase(node_network_receive_errs_total[5m]) > 0
+     for: 1m
+     labels:
+       severity: warning
+     annotations:
+       summary: "Host Network Receive Errors (instance {{ $labels.instance }})"
+       description: "{{ $labels.instance }} interface {{ $labels.device }} has encountered 1 receive errors in the last five minutes.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+   # -----* Host Network Receive Errors * ------
+   #this rule is for Host Network Transmit Errors
+   - alert: HostNetworkTransmitErrors
+     expr: increase(node_network_transmit_errs_total[5m]) > 0
+     for: 5m
+     labels:
+       severity: warning
+     annotations:
+       summary: "Host Network Transmit Errors (instance {{ $labels.instance }})"
+       description: "{{ $labels.instance }} interface {{ $labels.device }} has encountered 1 transmit errors in the last five minutes.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+   #Sigtran Node out of memory
+   - alert: App is OutOfMemory
+     expr: java_lang_OperatingSystem_FreePhysicalMemorySize/java_lang_OperatingSystem_TotalPhysicalMemorySize*100 < 20
+     for: 1m
+     labels:
+       severity: critical
+     annotations:
+       summary: "App goes out of memory (instance {{ $labels.instance }})"
+       description: "App memory is filling up (< 20% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
